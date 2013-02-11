@@ -5,6 +5,7 @@ var request = require('request');
 
 var port = settings.port || 8888;
 var sandboxOrigin = settings.sandboxOrigin || "http://sandbox.localhost:8888";
+var useMongo = settings.useMongo || false;
 
 //SERVER SIDE TEMPLATES
 GLOBAL.Handlebars = require('handlebars');
@@ -21,6 +22,7 @@ var mongoConf = {
 
 //MONGO SETUP
 var mongo = require('mongoskin');
+var ObjectID = mongo.ObjectID;
 var db = mongo.db(mongoConf.host + ':' + mongoConf.port + '/' + mongoConf.db + '?auto_reconnect');
 
 //collection to store some info on our users
@@ -29,9 +31,10 @@ var $users = db.collection("users");
 var $inlets = db.collection("inlets");
 //collection where we store visits (specifically to particular inlets)
 var $visits = db.collection("visits");
-
 //collection where we store images uploaded for thumbnails
 var $images = db.collection("images");
+//collection where we store gists uploaded for thumbnails
+var $gists = db.collection("gists");
 
 
 
@@ -73,11 +76,20 @@ function getgist_endpoint(req, res, next) {
 }
 
 function getgist(gistid, callback) {
-  var url = 'https://api.github.com/gists/' + gistid
-    + "?client_id=" + settings.GITHUB_CLIENT_ID
-    + "&client_secret=" + settings.GITHUB_CLIENT_SECRET;
-
-  request.get(url, callback);
+  if ( useMongo ) {
+    gistid = gistid.replace( /\s/g , '' );
+    $gists.findOne({ _id: ObjectID.createFromHexString(gistid) }, function( err, gist ) {
+      var dummyResponse = { statusCode: err ? 500 : 200 };
+      gist.id = gist._id;
+      replaceKeyName( gist.files, ':', '.' );
+      callback( err, dummyResponse, JSON.stringify( gist ) );
+    });
+  } else {
+    var url = 'https://api.github.com/gists/' + gistid
+      + "?client_id=" + settings.GITHUB_CLIENT_ID
+      + "&client_secret=" + settings.GITHUB_CLIENT_SECRET;
+    request.get(url, callback);
+  }
 }
 
 //Base view in tributary.
@@ -112,7 +124,8 @@ function inlet(req,res,next) {
     avatar_url: user? user.avatar_url : "",
     loggedin: user ? true : false,
     gistid: gistid,
-    sandboxOrigin: sandboxOrigin
+    sandboxOrigin: sandboxOrigin,
+    useMongo: useMongo
   });
   res.send(html);
 }
@@ -206,23 +219,38 @@ function fork_endpoint(req,res,next) {
 }
 
 function newgist(data, token, callback) {
-  //USER saves new gist
-  var url = 'https://api.github.com/gists'
-  var method = "POST";
-  var headers = {
-      'content-type': 'application/json'
-    , 'accept': 'application/json'
-  };
-  if(token) {
-    headers['Authorization'] = 'token ' + token;
-  }
+  if ( useMongo ) {
+    data = JSON.parse( data );
+    // Need to replace `.` with `:` in key,
+    // as mongo doesn't like `.` in key name.
+    replaceKeyName( data.files, '.', ':' );
+    
+    $gists.save( data, function( err, data ){
+      var dummyResponse = { statusCode: err ? 500 : 201 };
+      data.id = data._id;
+      replaceKeyName( data.files, ':', '.' );
+      onResponse( err, dummyResponse, JSON.stringify( data ) );
+    } );
 
-  request({
-    url: url,
-    body: data.toString(),
-    method: method,
-    headers: headers
-  }, onResponse)
+  } else {
+    //USER saves new gist
+    var url = 'https://api.github.com/gists'
+    var method = "POST";
+    var headers = {
+        'content-type': 'application/json'
+      , 'accept': 'application/json'
+    };
+    if(token) {
+      headers['Authorization'] = 'token ' + token;
+    }
+
+    request({
+      url: url,
+      body: data.toString(),
+      method: method,
+      headers: headers
+    }, onResponse)
+  }
 
   function onResponse(error, response, body) {
     if (!error && response.statusCode == 201) {
@@ -676,6 +704,13 @@ function api_endpoints(req, res, next)	{
     }
   }
   res.send(api_routes);
+}
+
+function replaceKeyName( obj, substring, newSubstring ){
+  for( var key in obj ){
+    obj[key.replace( substring, newSubstring )] = obj[key];
+    delete obj[key];
+  }
 }
 
 function dateQuery(start, end) {

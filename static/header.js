@@ -3,6 +3,7 @@
   var sandbox = d3.select("#sandbox").node().contentWindow;
 
   var _origin = header.origin;
+  var useMongo = header.useMongo;
   
   //these "globals" are modified by the save/fork buttons and referenced
   //when we recieve a save request
@@ -80,7 +81,7 @@
     //return object
     var ret = {};
     var cachebust = "?cachebust=" + Math.random() * 4242424242424242;
-    var url = 'https://api.github.com/gists/' + id + cachebust;
+    var url = ( useMongo ? '/gist/' : 'https://api.github.com/gists/' ) + id + cachebust;
     $.ajax({
       url: url,
       contentType: 'application/json',
