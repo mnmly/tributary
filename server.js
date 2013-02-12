@@ -50,7 +50,7 @@ var app = express()
   }))
   .use('/static', express.static(__dirname + '/static'))
   
-app.use(express.vhost(sandboxOrigin || "localhost", require(__dirname + '/sandbox').app))
+//app.use(express.vhost(sandboxOrigin || "localhost", require(__dirname + '/sandbox').app))
 
 
 

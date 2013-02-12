@@ -2,13 +2,11 @@
   //Get a reference to our iframe window so we can postMessage to it
   var sandbox = d3.select("#sandbox").node().contentWindow;
 
-  var _origin = header.origin,
+  var _origin = /http/.test( header.origin ) ? header.origin : location.origin,
       _allowedOrigins = header.allowedOrigins,
       useMongo = header.useMongo;
   
-  if( $.isArray( _allowedOrigins ) ){
-    _allowedOrigins.push( _origin );
-  }
+  _allowedOrigins.push( _origin );
   
   //these "globals" are modified by the save/fork buttons and referenced
   //when we recieve a save request
@@ -55,10 +53,8 @@
   window.addEventListener("message", recieveMessage, false)
   function recieveMessage(event) {
     
-    if( $.isArray( _allowedOrigins ) ){
-      if( $.inArray( event.origin, _allowedOrigins ) == -1 || !event.data) return;
-    } else {
-      if ( _allowedOrigins !== '*' ) return;
+    if( $.inArray( '*', _allowedOrigins ) === -1 ){
+      if( $.inArray( event.origin, _allowedOrigins ) === -1 || !event.data) return;
     }
 
     var data = event.data;
