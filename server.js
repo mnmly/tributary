@@ -12,6 +12,7 @@ var allowedOrigins = settings.allowedOrigins || [];
 //SERVER SIDE TEMPLATES
 GLOBAL.Handlebars = require('handlebars');
 require('./templates/server-templates');
+require('./sandbox/templates/sandbox-templates');
 
 //SESSION SETUP
 var ONE_YEAR = 1000 * 60 * 60 * 24 * 365;
@@ -57,7 +58,7 @@ var app = express()
 app.get("/sandbox", sandbox);
 
 function sandbox(req, res, next) {
-  var template = Handlebars.templates.inlet;
+  var template = Handlebars.templates["sandbox-inlet"];
   var html = template({ 
     origin: origin
   });
