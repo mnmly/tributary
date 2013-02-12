@@ -95,17 +95,22 @@ function getgist(gistid, callback) {
 }
 
 // List gists
-app.get('/list', list);
+app.get('/list.:format?', list);
 
 function list( req,res,next ) {
   if ( useMongo ) {
+    
     $gists.find().toArray( function( err, instances ){
       var template = Handlebars.templates.list;
       instances.reverse().forEach( function( d ){
         d.permalink = origin + '/inlet/' + d._id;
       } );
-      var html = template({ instances: instances });
-      res.send(html);
+      if ( req.params.format === 'json' ) {
+        res.send( instances );
+      } else {
+        var html = template({ instances: instances });
+        res.send(html);
+      }
           
     });
   } else {
