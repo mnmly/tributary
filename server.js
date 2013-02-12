@@ -53,6 +53,19 @@ var app = express()
 app.use(express.vhost('sandbox.' + settings.hostname || "localhost", require(__dirname + '/sandbox').app))
 
 
+
+app.get("/sandbox", sandbox);
+
+function sandbox(req, res, next) {
+  var template = Handlebars.templates.inlet;
+  var html = template({ 
+    origin: origin
+  });
+  res.send(html);
+};
+
+
+
 app.get("/", index);
 function index(req, res, next) {
   res.sendfile(__dirname + '/templates/index.html');

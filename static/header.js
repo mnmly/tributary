@@ -5,8 +5,10 @@
   var _origin = header.origin,
       _allowedOrigins = header.allowedOrigins,
       useMongo = header.useMongo;
-
-  _allowedOrigins.push( _origin );
+  
+  if( $.isArray( _allowedOrigins ) ){
+    _allowedOrigins.push( _origin );
+  }
   
   //these "globals" are modified by the save/fork buttons and referenced
   //when we recieve a save request
@@ -52,7 +54,13 @@
 
   window.addEventListener("message", recieveMessage, false)
   function recieveMessage(event) {
-    if( $.inArray( event.origin, _allowedOrigins ) == -1 || !event.data) return;
+    
+    if( $.isArray( _allowedOrigins ) ){
+      if( $.inArray( event.origin, _allowedOrigins ) == -1 || !event.data) return;
+    } else {
+      if ( _allowedOrigins !== '*' ) return;
+    }
+
     var data = event.data;
 
     if(data.request === "save") {
