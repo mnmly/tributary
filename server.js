@@ -4,6 +4,7 @@ var settings = require('./settings');
 var request = require('request');
 
 var port = settings.port || 8888;
+var origin = settings.origin;
 var sandboxOrigin = settings.sandboxOrigin || "http://sandbox.localhost:8888";
 var useMongo = settings.useMongo || false;
 var allowedOrigins = settings.allowedOrigins || [];
@@ -91,6 +92,34 @@ function getgist(gistid, callback) {
       + "&client_secret=" + settings.GITHUB_CLIENT_SECRET;
     request.get(url, callback);
   }
+}
+
+// List gists
+app.get('/list', list);
+
+function list( req,res,next ) {
+  if ( useMongo ) {
+    $gists.find().toArray( function( err, instances ){
+      var template = Handlebars.templates.list;
+      instances.reverse().forEach( function( d ){
+        d.permalink = origin + '/inlet/' + d._id;
+      } );
+      var html = template({ instances: instances });
+      res.send(html);
+          
+    });
+  } else {
+    
+  }
+}
+// List gists
+app.get('/delete/:gistid', deleteGist);
+function deleteGist( req,res,next ) {
+  var gistid = req.params.gistid;
+  gistid = gistid.replace( /\s/g , '' );
+  $gists.removeById( gistid, function(){
+    res.redirect( '/list' )
+  })
 }
 
 //Base view in tributary.
