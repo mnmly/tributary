@@ -6,6 +6,7 @@ var request = require('request');
 var port = settings.port || 8888;
 var sandboxOrigin = settings.sandboxOrigin || "http://sandbox.localhost:8888";
 var useMongo = settings.useMongo || false;
+var allowedOrigins = settings.allowedOrigins || [];
 
 //SERVER SIDE TEMPLATES
 GLOBAL.Handlebars = require('handlebars');
@@ -125,7 +126,8 @@ function inlet(req,res,next) {
     loggedin: user ? true : false,
     gistid: gistid,
     sandboxOrigin: sandboxOrigin,
-    useMongo: useMongo
+    useMongo: useMongo,
+    allowedOrigins: JSON.stringify( allowedOrigins )
   });
   res.send(html);
 }

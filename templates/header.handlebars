@@ -107,6 +107,7 @@
     header.userurl = "{{ user.html_url }}";
     header.origin = "{{ sandboxOrigin }}";
     header.useMongo = {{ useMongo }};
+    header.allowedOrigins = JSON.parse( '{{{ allowedOrigins }}}');
   </script>
 
 

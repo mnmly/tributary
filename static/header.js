@@ -2,8 +2,11 @@
   //Get a reference to our iframe window so we can postMessage to it
   var sandbox = d3.select("#sandbox").node().contentWindow;
 
-  var _origin = header.origin;
-  var useMongo = header.useMongo;
+  var _origin = header.origin,
+      _allowedOrigins = header.allowedOrigins,
+      useMongo = header.useMongo;
+
+  _allowedOrigins.push( _origin );
   
   //these "globals" are modified by the save/fork buttons and referenced
   //when we recieve a save request
@@ -31,6 +34,9 @@
   function setThumbnail(image) {
     sandbox.postMessage({request: "thumbnail", image: image}, _origin);
   }
+  function notifyExternalData( value ) {
+    sandbox.postMessage( { request: "external-data", value: value }, _origin );
+  }
 
   //on the load of the iframe, we want to get the gist (if any)
   //and then give it what it needs to fill out
@@ -46,7 +52,7 @@
 
   window.addEventListener("message", recieveMessage, false)
   function recieveMessage(event) {
-    if(event.origin !== _origin || !event.data) return;
+    if( $.inArray( event.origin, _allowedOrigins ) == -1 || !event.data) return;
     var data = event.data;
 
     if(data.request === "save") {
@@ -67,6 +73,8 @@
       $("#exit-fullscreen").show();
     } else if( data.request === "imgur" ) {
       imgur(data.img);
+    } else if( data.request === "external-data" ) {
+      notifyExternalData( data.value );
     }
   }
 

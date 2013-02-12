@@ -1215,6 +1215,23 @@ var Tributary = function() {
       d3.select("#trib-thumbnail").attr("src", image.data.link);
       d3.select("#trib-thumbnail").style("display", "");
       tributary.__config__.set("thumbnail", image.data.link);
+    } else if (data.request === "external-data") {
+      var assembleEndWatch = setInterval(function() {
+        if (tributary.__config__) {
+          clearInterval(assembleEndWatch);
+          var dataFileView = tributary.__config__.contexts.filter(function(view) {
+            return view.model.get("name") === "data";
+          })[0];
+          if (dataFileView) {
+            dataFileView.model.set("code", data.value);
+            dataFileView.editor.cm.setValue(data.value);
+            dataFileView.editor.cm.refresh();
+            $("#fullscreen").trigger("click");
+          } else {
+            alert("Template should have data.js");
+          }
+        }
+      }, 100);
     }
   }
   tributary.events.on("warnchanged", function() {

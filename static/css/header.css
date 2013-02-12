@@ -569,6 +569,7 @@ input[type=submit]:active {
   background-image: linear-gradient(top, #212121, rgba(255, 255, 255, 0));
   filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, StartColorStr='#212121', EndColorStr='#ffffff');
   opacity: 0.5;
+  display: none;
   -webkit-transition: all 0.8s ease-out;
   -moz-transition: all 0.8s ease-out;
   transition: all 0.8s ease-out;
