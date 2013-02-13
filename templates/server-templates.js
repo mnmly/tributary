@@ -146,7 +146,11 @@ templates['list'] = template(function (Handlebars,depth0,helpers,partials,data) 
 function program1(depth0,data) {
   
   var buffer = "", stack1, foundHelper;
-  buffer += "\n        <li>\n          <a href=\"";
+  buffer += "\n        <li>\n          <code>gistId: <span>";
+  foundHelper = helpers._id;
+  if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
+  else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
+  buffer += escapeExpression(stack1) + "</span></code>\n          <p><a href=\"";
   foundHelper = helpers.permalink;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.permalink; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
@@ -154,11 +158,11 @@ function program1(depth0,data) {
   foundHelper = helpers.description;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0.description; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "</a>\n          <a href=\"/delete/";
+  buffer += escapeExpression(stack1) + "</a> <a href=\"/delete/";
   foundHelper = helpers._id;
   if (foundHelper) { stack1 = foundHelper.call(depth0, {hash:{}}); }
   else { stack1 = depth0._id; stack1 = typeof stack1 === functionType ? stack1() : stack1; }
-  buffer += escapeExpression(stack1) + "\">×</a>\n        </li>\n      ";
+  buffer += escapeExpression(stack1) + "\">×</a></p>\n        </li>\n      ";
   return buffer;}
 
   buffer += "<!DOCTYPE HTML>\n<html>\n  <head>\n    <meta http-equiv=\"content-type\" content=\"text/html; charset=utf-8\" />\n  \n    <title>List</title>\n    <style type=\"text/css\" media=\"all\">\n      body{\n        font-family: \"Helvetica Neue\", sans-serif;\n      }\n    </style>\n  </head>\n  <body>\n    <h1>Gist List</h1>\n    <ul>\n      ";

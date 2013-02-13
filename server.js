@@ -54,6 +54,20 @@ var app = express()
 //app.use(express.vhost(sandboxOrigin || "localhost", require(__dirname + '/sandbox').app))
 
 
+app.get("/show/:gistName", showGist);
+
+function showGist(req, res, next) {
+  var gistName = req.params.gistName;
+  $gists.find({ description: gistName }, {sort:[['createdAt', -1]]} ).toArray( function( err, instances ){
+    if( instances.length > 0 ){
+      var instance = instances[0];
+      res.redirect( '/inlet/' + instance._id );
+    } else {
+      res.send( '<b>' + gistName + '</b> not found' );
+    }
+  })
+};
+
 
 app.get("/sandbox", sandbox);
 
@@ -216,7 +230,7 @@ function fork_endpoint(req,res,next) {
   if(!gistid || !user) {
     //No id, so creating a new gist
     //or anan user, can't make anon fork so create new gist
-    console.log("creating new gist");
+    console.log( "creating new gist" );
     newgist(data, token, function (err, response) {
       if(!err) {
         if(!user) return res.send(response);
@@ -271,10 +285,12 @@ function fork_endpoint(req,res,next) {
 function newgist(data, token, callback) {
   if ( useMongo ) {
     data = JSON.parse( data );
+    data.createdAt = new Date();
+
     // Need to replace `.` with `:` in key,
     // as mongo doesn't like `.` in key name.
     replaceKeyName( data.files, '.', ':' );
-    
+
     $gists.save( data, function( err, data ){
       var dummyResponse = { statusCode: err ? 500 : 201 };
       data.id = data._id;

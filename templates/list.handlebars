@@ -1,22 +1,38 @@
 <!DOCTYPE HTML>
 <html>
   <head>
+
     <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  
+
     <title>List</title>
+
     <style type="text/css" media="all">
       body{
         font-family: "Helvetica Neue", sans-serif;
-      }
+      };
+      li{
+        border-bottom: 1px solid grey;
+        margin-bottom: 1em;
+      };
     </style>
+    <script type="text/javascript" charset="utf-8">
+      var links = document.querySelectorAll( '.delete-link' );
+      for ( var i = 0; i < links.length; i += 1 ) {
+        var link = links[i];
+        link.addEventListener( 'click', onclick, false );
+      }
+      function onclick( e ){
+       if( !confirm( 'Are you sure you want to delete this visualization?' ) ) { return false; }
+      }
+    </script>
   </head>
   <body>
     <h1>Gist List</h1>
     <ul>
       {{#each instances }}
         <li>
-          <a href="{{ permalink }}">{{ description }}</a>
-          <a href="/delete/{{ _id }}">×</a>
+          <code>gistId: <span>{{ _id }}</span></code>
+          <p><a class='delete-link' href="{{ permalink }}">{{ description }}</a> <a href="/delete/{{ _id }}">×</a></p>
         </li>
       {{/each }}
     </ul>
